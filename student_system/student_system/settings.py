@@ -50,13 +50,15 @@ SECRET_KEY = os.environ.get(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = [
+# ALLOWED_HOSTS — include Vercel domains; filter out empty strings
+_vercel_url = os.environ.get('VERCEL_URL', '')   # e.g. myapp-abc123.vercel.app
+ALLOWED_HOSTS = list(filter(None, [
     'localhost',
     '127.0.0.1',
-    '.vercel.app',       # All Vercel preview & production domains
-    '.now.sh',           # Legacy Vercel domains
-    os.environ.get('VERCEL_URL', ''),  # Injected automatically by Vercel
-]
+    '.vercel.app',    # covers all *.vercel.app subdomains
+    '.now.sh',        # legacy Vercel domains
+    _vercel_url,      # specific deployment URL (empty string filtered out)
+]))
 
 
 # Application definition
@@ -107,16 +109,44 @@ WSGI_APPLICATION = 'student_system.wsgi.application'
 # DATABASE_URL format: postgresql://user:password@host:port/dbname
 
 def _parse_db_url(url):
-    """Parse a DATABASE_URL string into Django DATABASES dict."""
-    p = urlparse(url)
+    """Parse a DATABASE_URL into a Django DATABASES dict.
+
+    Handles passwords containing special characters (e.g. '@') by
+    splitting on the LAST '@' sign before the host.
+    """
+    from urllib.parse import unquote
+    # Strip scheme
+    rest = url.split('://', 1)[1]          # postgres:PASSWORD@HOST:PORT/NAME
+    # Split userinfo from host — last '@' separates them
+    at_idx = rest.rfind('@')
+    userinfo = rest[:at_idx]               # postgres:PASSWORD
+    hostinfo = rest[at_idx + 1:]           # HOST:PORT/NAME
+
+    # Parse user:password
+    if ':' in userinfo:
+        user, password = userinfo.split(':', 1)
+    else:
+        user, password = userinfo, ''
+
+    # Parse host:port/dbname
+    if '/' in hostinfo:
+        hostport, dbname = hostinfo.split('/', 1)
+    else:
+        hostport, dbname = hostinfo, ''
+
+    if ':' in hostport:
+        host, port = hostport.rsplit(':', 1)
+    else:
+        host, port = hostport, '5432'
+
     return {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': p.path.lstrip('/'),
-        'USER': p.username or '',
-        'PASSWORD': p.password or '',
-        'HOST': p.hostname or '',
-        'PORT': str(p.port or 5432),
-        'OPTIONS': {'sslmode': 'require'},  # Supabase requires SSL
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     unquote(dbname),
+        'USER':     unquote(user),
+        'PASSWORD': unquote(password),   # handles %40 etc.
+        'HOST':     host,
+        'PORT':     port,
+        'OPTIONS':  {'sslmode': 'require'},
     }
 
 
@@ -191,12 +221,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ─── Production Security (active when DEBUG=False on Vercel) ─────────────────
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SECURE_HSTS_SECONDS = 31536000   # 1 year
+    # Tell Django to trust Vercel's edge SSL termination
+    # Vercel sends HTTP internally; X-Forwarded-Proto: https is the real signal
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    # DO NOT set SECURE_SSL_REDIRECT on Vercel — the edge already handles HTTPS.
+    # Setting it causes Django to loop-redirect HTTP → HTTPS endlessly → 500.
+    # SECURE_SSL_REDIRECT = True   ← intentionally disabled for Vercel
+
+    SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
