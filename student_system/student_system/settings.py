@@ -152,7 +152,7 @@ def _parse_db_url(url):
 
 _db_url = os.environ.get('DATABASE_URL', '')
 
-if _db_url and 'YOUR_DB_PASSWORD' not in _db_url and _db_url.startswith('postgresql'):
+if _db_url and 'YOUR_DB_PASSWORD' not in _db_url and (_db_url.startswith('postgresql') or _db_url.startswith('postgres')):
     # Use Supabase PostgreSQL
     DATABASES = {'default': _parse_db_url(_db_url)}
 else:
