@@ -1,0 +1,185 @@
+{% extends 'student_app/base.html' %}
+
+{% block title %}{{ action }} Student{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'student_list' %}">Students</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>{{ action }} Student</span>
+    </div>
+    <h1 class="page-title">{{ action }} Student</h1>
+    <p class="page-subtitle">{% if action == 'Add' %}Fill in the details to register a new student.{% else %}Update the student's information below.{% endif %}</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'student_list' %}" class="btn btn-secondary">
+      <i class="ri-arrow-left-line"></i> Back to List
+    </a>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" id="student-form">
+  {% csrf_token %}
+
+  <!-- Non-field errors -->
+  {% if form.non_field_errors %}
+  <div class="alert alert-error">
+    <i class="ri-error-warning-line"></i>
+    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Personal Information -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header">
+      <h2 class="card-title"><i class="ri-user-line" style="color:var(--primary);"></i> Personal Information</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <!-- Student ID -->
+        <div class="form-group">
+          <label class="form-label" for="{{ form.student_id.id_for_label }}">
+            Student ID <span class="required">*</span>
+          </label>
+          {{ form.student_id }}
+          {% if form.student_id.errors %}
+          <div class="form-error"><i class="ri-error-warning-line"></i> {{ form.student_id.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Gender -->
+        <div class="form-group">
+          <label class="form-label" for="{{ form.gender.id_for_label }}">
+            Gender <span class="required">*</span>
+          </label>
+          {{ form.gender }}
+          {% if form.gender.errors %}
+          <div class="form-error"><i class="ri-error-warning-line"></i> {{ form.gender.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <!-- First Name -->
+        <div class="form-group">
+          <label class="form-label" for="{{ form.first_name.id_for_label }}">
+            First Name <span class="required">*</span>
+          </label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}
+          <div class="form-error"><i class="ri-error-warning-line"></i> {{ form.first_name.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Last Name -->
+        <div class="form-group">
+          <label class="form-label" for="{{ form.last_name.id_for_label }}">
+            Last Name <span class="required">*</span>
+          </label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}
+          <div class="form-error"><i class="ri-error-warning-line"></i> {{ form.last_name.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Date of Birth -->
+        <div class="form-group">
+          <label class="form-label" for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
+          {{ form.date_of_birth }}
+          {% if form.date_of_birth.errors %}
+          <div class="form-error"><i class="ri-error-warning-line"></i> {{ form.date_of_birth.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Information -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header">
+      <h2 class="card-title"><i class="ri-contacts-line" style="color:var(--primary);"></i> Contact Information</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="{{ form.email.id_for_label }}">
+            Email <span class="required">*</span>
+          </label>
+          {{ form.email }}
+          {% if form.email.errors %}
+          <div class="form-error"><i class="ri-error-warning-line"></i> {{ form.email.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.phone.id_for_label }}">Phone</label>
+          {{ form.phone }}
+          {% if form.phone.errors %}
+          <div class="form-error"><i class="ri-error-warning-line"></i> {{ form.phone.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="{{ form.address.id_for_label }}">Address</label>
+          {{ form.address }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Academic Information -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header">
+      <h2 class="card-title"><i class="ri-graduation-cap-line" style="color:var(--primary);"></i> Academic Information</h2>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="{{ form.department.id_for_label }}">Department</label>
+          {{ form.department }}
+          {% if form.department.errors %}
+          <div class="form-error"><i class="ri-error-warning-line"></i> {{ form.department.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.status.id_for_label }}">Status</label>
+          {{ form.status }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="{{ form.gpa.id_for_label }}">GPA</label>
+          {{ form.gpa }}
+          <span class="form-hint">Scale: 0.00 – 4.00</span>
+          {% if form.gpa.errors %}
+          <div class="form-error"><i class="ri-error-warning-line"></i> {{ form.gpa.errors|join:", " }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div style="display:flex; gap:12px; justify-content:flex-end;">
+    <a href="{% url 'student_list' %}" class="btn btn-secondary btn-lg">
+      <i class="ri-close-line"></i> Cancel
+    </a>
+    <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+      <i class="ri-save-line"></i> {{ action }} Student
+    </button>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.getElementById('student-form').addEventListener('submit', function() {
+    const btn = document.getElementById('submit-btn');
+    btn.innerHTML = '<i class="ri-loader-4-line"></i> Saving…';
+    btn.disabled = true;
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'student_app/base.html' %}
+{% block title %}Enroll {{ student.full_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'student_list' %}">Students</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'student_detail' student.pk %}">{{ student.full_name }}</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Enroll</span>
+    </div>
+    <h1 class="page-title">Enroll in Course</h1>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'student_detail' student.pk %}" class="btn btn-secondary">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
+  </div>
+</div>
+
+<div style="max-width:560px;">
+  <!-- Student Info Banner -->
+  <div style="background:var(--primary-bg); border:1px solid var(--primary-light); border-radius:var(--r-md); padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; gap:14px;">
+    <div class="student-avatar" style="width:44px; height:44px; font-size:16px; flex-shrink:0;">
+      {{ student.first_name|first }}{{ student.last_name|first }}
+    </div>
+    <div>
+      <div style="font-weight:700; color:var(--primary);">{{ student.full_name }}</div>
+      <div style="font-size:13px; color:var(--text-secondary);">{{ student.student_id }} · {{ student.department.name|default:"No Department" }}</div>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="ri-book-2-line" style="color:var(--primary);"></i> Enrollment Details</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-grid cols-1">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.course.id_for_label }}">Course <span class="required">*</span></label>
+            {{ form.course }}
+            {% if form.course.errors %}<div class="form-error"><i class="ri-error-warning-line"></i> {{ form.course.errors|join:", " }}</div>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.semester.id_for_label }}">Semester</label>
+            {{ form.semester }}
+            <span class="form-hint">e.g. Fall 2024, Spring 2025</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.grade.id_for_label }}">Grade <span style="color:var(--text-muted); font-weight:400;">(optional)</span></label>
+            {{ form.grade }}
+          </div>
+        </div>
+      </div>
+      <div class="card-footer" style="display:flex; gap:10px; justify-content:flex-end;">
+        <a href="{% url 'student_detail' student.pk %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-success">
+          <i class="ri-check-line"></i> Enroll Student
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

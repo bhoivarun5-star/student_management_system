@@ -1,0 +1,224 @@
+{% extends 'student_app/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">Welcome back! Here's what's happening at your institution.</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'student_create' %}" class="btn btn-primary">
+      <i class="ri-user-add-line"></i> Add Student
+    </a>
+  </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+  <div class="stat-card" style="--stat-color:#4361ee; --stat-bg:#eef2ff;">
+    <div class="stat-icon"><i class="ri-group-line"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ total_students }}</div>
+      <div class="stat-label">Total Students</div>
+    </div>
+  </div>
+
+  <div class="stat-card" style="--stat-color:#059669; --stat-bg:#d1fae5;">
+    <div class="stat-icon"><i class="ri-user-follow-line"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ active_students }}</div>
+      <div class="stat-label">Active Students</div>
+    </div>
+  </div>
+
+  <div class="stat-card" style="--stat-color:#7c3aed; --stat-bg:#ede9fe;">
+    <div class="stat-icon"><i class="ri-building-4-line"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ total_departments }}</div>
+      <div class="stat-label">Departments</div>
+    </div>
+  </div>
+
+  <div class="stat-card" style="--stat-color:#d97706; --stat-bg:#fef3c7;">
+    <div class="stat-icon"><i class="ri-book-open-line"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ total_courses }}</div>
+      <div class="stat-label">Courses</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Grid -->
+<div style="display:grid; grid-template-columns:1fr 340px; gap:20px; align-items:start;">
+
+  <!-- Recent Students Table -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title"><i class="ri-user-line" style="color:var(--primary);"></i> Recent Students</h2>
+      <a href="{% url 'student_list' %}" class="btn btn-secondary btn-sm">View All</a>
+    </div>
+    {% if recent_students %}
+    <div class="table-wrapper" style="border:none; border-radius:0; box-shadow:none;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>GPA</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in recent_students %}
+          <tr>
+            <td>
+              <div class="student-name-cell">
+                <div class="student-avatar">{{ s.first_name|first }}{{ s.last_name|first }}</div>
+                <div>
+                  <div class="name">{{ s.full_name }}</div>
+                  <div class="id">{{ s.student_id }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ s.department.name|default:"—" }}</td>
+            <td>
+              {% if s.status == 'active' %}
+                <span class="badge badge-success"><i class="ri-circle-fill" style="font-size:7px;"></i> Active</span>
+              {% elif s.status == 'graduated' %}
+                <span class="badge badge-info">Graduated</span>
+              {% elif s.status == 'suspended' %}
+                <span class="badge badge-danger">Suspended</span>
+              {% else %}
+                <span class="badge badge-gray">Inactive</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if s.gpa %}
+                {% if s.gpa >= 3.5 %}
+                  <span class="gpa-pill gpa-high">{{ s.gpa }}</span>
+                {% elif s.gpa >= 2.5 %}
+                  <span class="gpa-pill gpa-mid">{{ s.gpa }}</span>
+                {% else %}
+                  <span class="gpa-pill gpa-low">{{ s.gpa }}</span>
+                {% endif %}
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              <a href="{% url 'student_detail' s.pk %}" class="btn btn-secondary btn-sm">View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card-body">
+      <div class="empty-state">
+        <div class="empty-state-icon">👨‍🎓</div>
+        <div class="empty-state-title">No students yet</div>
+        <div class="empty-state-text">Add your first student to get started.</div>
+        <a href="{% url 'student_create' %}" class="btn btn-primary">Add Student</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right Column -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+
+    <!-- Status Breakdown -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="ri-pie-chart-line" style="color:var(--primary);"></i> Status Breakdown</h2>
+      </div>
+      <div class="card-body" style="display:flex; flex-direction:column; gap:14px;">
+        {% with total=total_students %}
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span class="text-sm" style="color:var(--success); font-weight:600;">Active</span>
+            <span class="text-sm font-bold">{{ status_data.active }}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width:{% if total > 0 %}{% widthratio status_data.active total 100 %}{% else %}0{% endif %}%; background:var(--success);"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span class="text-sm" style="color:var(--info); font-weight:600;">Graduated</span>
+            <span class="text-sm font-bold">{{ status_data.graduated }}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width:{% if total > 0 %}{% widthratio status_data.graduated total 100 %}{% else %}0{% endif %}%; background:var(--info);"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span class="text-sm" style="color:var(--text-muted); font-weight:600;">Inactive</span>
+            <span class="text-sm font-bold">{{ status_data.inactive }}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width:{% if total > 0 %}{% widthratio status_data.inactive total 100 %}{% else %}0{% endif %}%; background:var(--gray-400);"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span class="text-sm" style="color:var(--danger); font-weight:600;">Suspended</span>
+            <span class="text-sm font-bold">{{ status_data.suspended }}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width:{% if total > 0 %}{% widthratio status_data.suspended total 100 %}{% else %}0{% endif %}%; background:var(--danger);"></div>
+          </div>
+        </div>
+        {% endwith %}
+      </div>
+    </div>
+
+    <!-- Top Departments -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="ri-building-4-line" style="color:var(--primary);"></i> Departments</h2>
+        <a href="{% url 'department_list' %}" class="btn btn-secondary btn-sm">View All</a>
+      </div>
+      <div class="card-body" style="display:flex; flex-direction:column; gap:12px;">
+        {% for dept in dept_stats %}
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:36px; height:36px; border-radius:var(--r); background:var(--primary-bg); display:flex; align-items:center; justify-content:center; color:var(--primary); font-weight:700; font-size:12px; flex-shrink:0;">
+            {{ dept.code }}
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ dept.name }}</div>
+            <div style="font-size:11px; color:var(--text-muted);">{{ dept.student_count }} student{{ dept.student_count|pluralize }}</div>
+          </div>
+          <span class="badge badge-primary">{{ dept.student_count }}</span>
+        </div>
+        {% empty %}
+        <p class="text-muted text-sm text-center">No departments yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="ri-flashlight-line" style="color:var(--warning);"></i> Quick Actions</h2>
+      </div>
+      <div class="card-body" style="display:flex; flex-direction:column; gap:8px;">
+        <a href="{% url 'student_create' %}" class="btn btn-primary w-full" style="justify-content:center;">
+          <i class="ri-user-add-line"></i> New Student
+        </a>
+        <a href="{% url 'department_create' %}" class="btn btn-secondary w-full" style="justify-content:center;">
+          <i class="ri-building-line"></i> New Department
+        </a>
+        <a href="{% url 'course_create' %}" class="btn btn-secondary w-full" style="justify-content:center;">
+          <i class="ri-book-2-line"></i> New Course
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

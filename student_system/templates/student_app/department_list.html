@@ -1,0 +1,70 @@
+{% extends 'student_app/base.html' %}
+{% block title %}Departments{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Departments</span>
+    </div>
+    <h1 class="page-title">Departments</h1>
+    <p class="page-subtitle">Manage academic departments and their students.</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'department_create' %}" class="btn btn-primary">
+      <i class="ri-add-line"></i> Add Department
+    </a>
+  </div>
+</div>
+
+{% if departments %}
+<div class="dept-grid">
+  {% for dept in departments %}
+  <div class="dept-card">
+    <div class="dept-header">
+      <div class="dept-icon">🏛️</div>
+      <div>
+        <div class="dept-name">{{ dept.name }}</div>
+        <div class="dept-code">{{ dept.code }}</div>
+      </div>
+    </div>
+
+    {% if dept.description %}
+    <p style="font-size:13px; color:var(--text-secondary); line-height:1.5;">{{ dept.description|truncatechars:100 }}</p>
+    {% endif %}
+
+    <div class="dept-stats">
+      <div class="dept-stat">
+        <span class="val">{{ dept.student_count }}</span>
+        <span class="lbl">Students</span>
+      </div>
+      <div class="dept-stat">
+        <span class="val">{{ dept.course_count }}</span>
+        <span class="lbl">Courses</span>
+      </div>
+    </div>
+
+    <div class="dept-actions">
+      <a href="{% url 'department_edit' dept.pk %}" class="btn btn-secondary btn-sm">
+        <i class="ri-edit-line"></i> Edit
+      </a>
+      <a href="{% url 'department_delete' dept.pk %}" class="btn btn-danger btn-sm">
+        <i class="ri-delete-bin-line"></i> Delete
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="empty-state-icon">🏛️</div>
+    <div class="empty-state-title">No departments yet</div>
+    <div class="empty-state-text">Create departments to organize students and courses.</div>
+    <a href="{% url 'department_create' %}" class="btn btn-primary">Add Department</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'student_app/base.html' %}
+
+{% block title %}Students{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Students</span>
+    </div>
+    <h1 class="page-title">Students</h1>
+    <p class="page-subtitle">{{ total }} student{{ total|pluralize }} found</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'student_create' %}" class="btn btn-primary">
+      <i class="ri-user-add-line"></i> Add Student
+    </a>
+  </div>
+</div>
+
+<!-- Filters -->
+<form method="get" id="filter-form">
+  <div class="filters-bar">
+    <div class="form-group">
+      <label class="form-label">Search</label>
+      {{ form.query }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">Department</label>
+      {{ form.department }}
+    </div>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      {{ form.status }}
+    </div>
+    <div style="display:flex; gap:8px; align-items:flex-end;">
+      <button type="submit" class="btn btn-primary">
+        <i class="ri-search-line"></i> Filter
+      </button>
+      <a href="{% url 'student_list' %}" class="btn btn-secondary">
+        <i class="ri-refresh-line"></i> Reset
+      </a>
+    </div>
+  </div>
+</form>
+
+<!-- Table -->
+{% if students %}
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Student</th>
+        <th>Email</th>
+        <th>Department</th>
+        <th>Status</th>
+        <th>GPA</th>
+        <th>Enrolled</th>
+        <th style="text-align:right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+      <tr>
+        <td>
+          <div class="student-name-cell">
+            <div class="student-avatar">{{ student.first_name|first }}{{ student.last_name|first }}</div>
+            <div>
+              <div class="name">{{ student.full_name }}</div>
+              <div class="id">{{ student.student_id }}</div>
+            </div>
+          </div>
+        </td>
+        <td style="color:var(--text-secondary);">{{ student.email }}</td>
+        <td>
+          {% if student.department %}
+            <span class="badge badge-primary">{{ student.department.code }}</span>
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if student.status == 'active' %}
+            <span class="badge badge-success"><i class="ri-circle-fill" style="font-size:7px;"></i> Active</span>
+          {% elif student.status == 'graduated' %}
+            <span class="badge badge-info"><i class="ri-award-line"></i> Graduated</span>
+          {% elif student.status == 'suspended' %}
+            <span class="badge badge-danger"><i class="ri-forbid-line"></i> Suspended</span>
+          {% else %}
+            <span class="badge badge-gray">Inactive</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if student.gpa %}
+            {% if student.gpa >= 3.5 %}
+              <span class="gpa-pill gpa-high">{{ student.gpa }}</span>
+            {% elif student.gpa >= 2.5 %}
+              <span class="gpa-pill gpa-mid">{{ student.gpa }}</span>
+            {% else %}
+              <span class="gpa-pill gpa-low">{{ student.gpa }}</span>
+            {% endif %}
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td style="color:var(--text-secondary); font-size:13px;">{{ student.enrollment_date|date:"M d, Y" }}</td>
+        <td>
+          <div class="table-actions" style="justify-content:flex-end;">
+            <a href="{% url 'student_detail' student.pk %}" class="btn btn-secondary btn-sm" title="View">
+              <i class="ri-eye-line"></i>
+            </a>
+            <a href="{% url 'student_edit' student.pk %}" class="btn btn-secondary btn-sm" title="Edit">
+              <i class="ri-edit-line"></i>
+            </a>
+            <a href="{% url 'student_delete' student.pk %}" class="btn btn-danger btn-sm" title="Delete">
+              <i class="ri-delete-bin-line"></i>
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="empty-state-icon">🔍</div>
+    <div class="empty-state-title">No students found</div>
+    <div class="empty-state-text">Try adjusting your search filters or add a new student.</div>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <a href="{% url 'student_list' %}" class="btn btn-secondary">Clear Filters</a>
+      <a href="{% url 'student_create' %}" class="btn btn-primary">Add Student</a>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

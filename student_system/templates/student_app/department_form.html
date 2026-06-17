@@ -1,0 +1,58 @@
+{% extends 'student_app/base.html' %}
+{% block title %}{{ action }} Department{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'department_list' %}">Departments</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>{{ action }}</span>
+    </div>
+    <h1 class="page-title">{{ action }} Department</h1>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'department_list' %}" class="btn btn-secondary">
+      <i class="ri-arrow-left-line"></i> Back
+    </a>
+  </div>
+</div>
+
+<div style="max-width:640px;">
+  <form method="post">
+    {% csrf_token %}
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="ri-building-4-line" style="color:var(--primary);"></i> Department Details</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="{{ form.name.id_for_label }}">Department Name <span class="required">*</span></label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="form-error"><i class="ri-error-warning-line"></i> {{ form.name.errors|join:", " }}</div>{% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="{{ form.code.id_for_label }}">Code <span class="required">*</span></label>
+            {{ form.code }}
+            <span class="form-hint">Short code, e.g. CS, MATH, ENG</span>
+            {% if form.code.errors %}<div class="form-error"><i class="ri-error-warning-line"></i> {{ form.code.errors|join:", " }}</div>{% endif %}
+          </div>
+          <div class="form-group full">
+            <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+            {{ form.description }}
+          </div>
+        </div>
+      </div>
+      <div class="card-footer" style="display:flex; gap:10px; justify-content:flex-end;">
+        <a href="{% url 'department_list' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+          <i class="ri-save-line"></i> {{ action }} Department
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

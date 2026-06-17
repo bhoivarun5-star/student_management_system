@@ -1,0 +1,249 @@
+{% extends 'student_app/base.html' %}
+
+{% block title %}{{ student.full_name }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb + Header -->
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'student_list' %}">Students</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>{{ student.full_name }}</span>
+    </div>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'enroll_student' student.pk %}" class="btn btn-success">
+      <i class="ri-book-2-line"></i> Enroll in Course
+    </a>
+    <a href="{% url 'student_edit' student.pk %}" class="btn btn-primary">
+      <i class="ri-edit-line"></i> Edit
+    </a>
+    <a href="{% url 'student_delete' student.pk %}" class="btn btn-danger">
+      <i class="ri-delete-bin-line"></i> Delete
+    </a>
+  </div>
+</div>
+
+<!-- Profile Header Card -->
+<div class="detail-header">
+  <div class="detail-avatar">{{ student.first_name|first }}{{ student.last_name|first }}</div>
+  <div class="detail-info">
+    <div class="detail-name">{{ student.full_name }}</div>
+    <div class="detail-meta">
+      <span class="detail-meta-item">
+        <i class="ri-id-card-line"></i> {{ student.student_id }}
+      </span>
+      <span class="detail-meta-item">
+        <i class="ri-mail-line"></i> {{ student.email }}
+      </span>
+      {% if student.phone %}
+      <span class="detail-meta-item">
+        <i class="ri-phone-line"></i> {{ student.phone }}
+      </span>
+      {% endif %}
+      {% if student.department %}
+      <span class="detail-meta-item">
+        <i class="ri-building-4-line"></i> {{ student.department.name }}
+      </span>
+      {% endif %}
+    </div>
+  </div>
+  <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px; flex-shrink:0;">
+    {% if student.status == 'active' %}
+      <span class="badge badge-success" style="font-size:13px; padding:6px 14px;"><i class="ri-circle-fill" style="font-size:8px;"></i> Active</span>
+    {% elif student.status == 'graduated' %}
+      <span class="badge badge-info" style="font-size:13px; padding:6px 14px;"><i class="ri-award-line"></i> Graduated</span>
+    {% elif student.status == 'suspended' %}
+      <span class="badge badge-danger" style="font-size:13px; padding:6px 14px;"><i class="ri-forbid-line"></i> Suspended</span>
+    {% else %}
+      <span class="badge badge-gray" style="font-size:13px; padding:6px 14px;">Inactive</span>
+    {% endif %}
+
+    {% if student.gpa %}
+    <div style="text-align:center;">
+      <div style="font-size:11px; color:var(--text-muted); margin-bottom:2px;">GPA</div>
+      {% if student.gpa >= 3.5 %}
+        <span class="gpa-pill gpa-high" style="font-size:18px; padding:6px 14px;">{{ student.gpa }}</span>
+      {% elif student.gpa >= 2.5 %}
+        <span class="gpa-pill gpa-mid" style="font-size:18px; padding:6px 14px;">{{ student.gpa }}</span>
+      {% else %}
+        <span class="gpa-pill gpa-low" style="font-size:18px; padding:6px 14px;">{{ student.gpa }}</span>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Detail Grid -->
+<div style="display:grid; grid-template-columns:1fr 360px; gap:20px; align-items:start;">
+
+  <!-- Left: Info + Enrollments -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+
+    <!-- Personal Info -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="ri-user-line" style="color:var(--primary);"></i> Personal Information</h2>
+      </div>
+      <div class="card-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Full Name</div>
+            <div class="info-value">{{ student.full_name }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Gender</div>
+            <div class="info-value">{{ student.get_gender_display|default:"—" }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Date of Birth</div>
+            <div class="info-value">{{ student.date_of_birth|date:"F d, Y"|default:"—" }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Email</div>
+            <div class="info-value"><a href="mailto:{{ student.email }}">{{ student.email }}</a></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Phone</div>
+            <div class="info-value">{{ student.phone|default:"—" }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Address</div>
+            <div class="info-value">{{ student.address|default:"—" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enrollments -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="ri-book-open-line" style="color:var(--primary);"></i> Enrolled Courses</h2>
+        <a href="{% url 'enroll_student' student.pk %}" class="btn btn-primary btn-sm">
+          <i class="ri-add-line"></i> Enroll
+        </a>
+      </div>
+      <div class="card-body">
+        {% if enrollments %}
+        <div class="enrollment-grid">
+          {% for e in enrollments %}
+          <div class="enrollment-card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <div class="enrollment-course">{{ e.course.name }}</div>
+                <div class="enrollment-meta">
+                  <i class="ri-bookmark-line"></i> {{ e.course.code }}
+                  {% if e.semester %} &bull; {{ e.semester }}{% endif %}
+                </div>
+              </div>
+              {% if e.grade %}
+              <span class="badge {% if e.grade == 'A+' or e.grade == 'A' or e.grade == 'A-' %}badge-success{% elif e.grade == 'F' %}badge-danger{% else %}badge-warning{% endif %}">
+                {{ e.grade }}
+              </span>
+              {% endif %}
+            </div>
+            <div style="margin-top:8px; display:flex; gap:6px;">
+              <span class="badge badge-primary">{{ e.course.credits }} credit{{ e.course.credits|pluralize }}</span>
+              {% if e.course.department %}
+              <span class="badge badge-gray">{{ e.course.department.code }}</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:32px 24px;">
+          <div class="empty-state-icon">📚</div>
+          <div class="empty-state-title">No courses enrolled</div>
+          <div class="empty-state-text">Enroll this student in courses to track academic progress.</div>
+          <a href="{% url 'enroll_student' student.pk %}" class="btn btn-primary">Enroll in Course</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right: Academic + Timeline -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+
+    <!-- Academic Info -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="ri-graduation-cap-line" style="color:var(--primary);"></i> Academic Info</h2>
+      </div>
+      <div class="card-body" style="display:flex; flex-direction:column; gap:16px;">
+        <div class="info-item">
+          <div class="info-label">Department</div>
+          <div class="info-value">{{ student.department.name|default:"Not assigned" }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Status</div>
+          <div class="info-value">{{ student.get_status_display }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Enrollment Date</div>
+          <div class="info-value">{{ student.enrollment_date|date:"F d, Y" }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Courses Enrolled</div>
+          <div class="info-value">{{ enrollments.count }}</div>
+        </div>
+        {% if student.gpa %}
+        <div class="info-item">
+          <div class="info-label">GPA</div>
+          <div class="info-value">
+            {% if student.gpa >= 3.5 %}
+              <span class="gpa-pill gpa-high">{{ student.gpa }} / 4.00</span>
+            {% elif student.gpa >= 2.5 %}
+              <span class="gpa-pill gpa-mid">{{ student.gpa }} / 4.00</span>
+            {% else %}
+              <span class="gpa-pill gpa-low">{{ student.gpa }} / 4.00</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- System Info -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="ri-time-line" style="color:var(--primary);"></i> Record Info</h2>
+      </div>
+      <div class="card-body" style="display:flex; flex-direction:column; gap:12px;">
+        <div class="info-item">
+          <div class="info-label">Created</div>
+          <div class="info-value">{{ student.created_at|date:"M d, Y — H:i" }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Last Updated</div>
+          <div class="info-value">{{ student.updated_at|date:"M d, Y — H:i" }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="ri-flashlight-line" style="color:var(--warning);"></i> Actions</h2>
+      </div>
+      <div class="card-body" style="display:flex; flex-direction:column; gap:8px;">
+        <a href="{% url 'student_edit' student.pk %}" class="btn btn-primary w-full" style="justify-content:center;">
+          <i class="ri-edit-line"></i> Edit Profile
+        </a>
+        <a href="{% url 'enroll_student' student.pk %}" class="btn btn-success w-full" style="justify-content:center;">
+          <i class="ri-book-2-line"></i> Enroll in Course
+        </a>
+        <a href="{% url 'student_delete' student.pk %}" class="btn btn-danger w-full" style="justify-content:center;">
+          <i class="ri-delete-bin-line"></i> Delete Record
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'student_app/base.html' %}
+{% block title %}Delete {{ student.full_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <a href="{% url 'student_list' %}">Students</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Delete</span>
+    </div>
+    <h1 class="page-title">Delete Student</h1>
+  </div>
+</div>
+
+<div style="max-width:560px; margin:0 auto;">
+  <div class="card">
+    <div class="card-body">
+      <div class="danger-zone">
+        <div class="danger-zone-icon">⚠️</div>
+        <h2 style="font-size:20px; font-weight:700; color:var(--danger); margin-bottom:8px;">Confirm Deletion</h2>
+        <p style="color:var(--text-secondary); margin-bottom:16px;">
+          You are about to permanently delete the student record for:
+        </p>
+        <div style="background:white; border-radius:var(--r); padding:16px; margin-bottom:20px; border:1px solid #fca5a5;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="student-avatar" style="width:48px; height:48px; font-size:18px;">
+              {{ student.first_name|first }}{{ student.last_name|first }}
+            </div>
+            <div>
+              <div style="font-weight:700; font-size:16px;">{{ student.full_name }}</div>
+              <div style="font-size:13px; color:var(--text-muted);">{{ student.student_id }} · {{ student.email }}</div>
+            </div>
+          </div>
+        </div>
+        <p style="color:var(--danger); font-weight:600; font-size:14px; margin-bottom:20px;">
+          <i class="ri-error-warning-line"></i> This action cannot be undone. All enrollment data will also be deleted.
+        </p>
+        <form method="post" style="display:flex; gap:12px; justify-content:center;">
+          {% csrf_token %}
+          <a href="{% url 'student_detail' student.pk %}" class="btn btn-secondary btn-lg">
+            <i class="ri-arrow-left-line"></i> Cancel
+          </a>
+          <button type="submit" class="btn btn-danger btn-lg">
+            <i class="ri-delete-bin-line"></i> Yes, Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

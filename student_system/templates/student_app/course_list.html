@@ -1,0 +1,77 @@
+{% extends 'student_app/base.html' %}
+{% block title %}Courses{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="breadcrumb">
+      <a href="{% url 'dashboard' %}">Home</a>
+      <span class="sep"><i class="ri-arrow-right-s-line"></i></span>
+      <span>Courses</span>
+    </div>
+    <h1 class="page-title">Courses</h1>
+    <p class="page-subtitle">All courses offered at the institution.</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'course_create' %}" class="btn btn-primary">
+      <i class="ri-add-line"></i> Add Course
+    </a>
+  </div>
+</div>
+
+{% if courses %}
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Course Name</th>
+        <th>Department</th>
+        <th>Credits</th>
+        <th>Enrolled</th>
+        <th style="text-align:right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for course in courses %}
+      <tr>
+        <td><span class="course-tag">{{ course.code }}</span></td>
+        <td>
+          <div style="font-weight:600;">{{ course.name }}</div>
+          {% if course.description %}
+          <div style="font-size:12px; color:var(--text-muted);">{{ course.description|truncatechars:60 }}</div>
+          {% endif %}
+        </td>
+        <td>{{ course.department.name|default:"—" }}</td>
+        <td>
+          <span class="badge badge-info">{{ course.credits }} cr.</span>
+        </td>
+        <td>
+          <span class="badge badge-gray">{{ course.enrollment_count }} student{{ course.enrollment_count|pluralize }}</span>
+        </td>
+        <td>
+          <div class="table-actions" style="justify-content:flex-end;">
+            <a href="{% url 'course_edit' course.pk %}" class="btn btn-secondary btn-sm">
+              <i class="ri-edit-line"></i>
+            </a>
+            <a href="{% url 'course_delete' course.pk %}" class="btn btn-danger btn-sm">
+              <i class="ri-delete-bin-line"></i>
+            </a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="empty-state-icon">📖</div>
+    <div class="empty-state-title">No courses yet</div>
+    <div class="empty-state-text">Add courses that students can enroll in.</div>
+    <a href="{% url 'course_create' %}" class="btn btn-primary">Add Course</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
