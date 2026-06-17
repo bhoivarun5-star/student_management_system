@@ -176,9 +176,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# Vercel / production: collectstatic output dir + WhiteNoise compression
+# Vercel / production: WhiteNoise serves compressed files directly from STATICFILES_DIRS
+# Using CompressedStaticFilesStorage (NOT Manifest) so collectstatic is not required on Vercel
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+WHITENOISE_USE_FINDERS = True  # Serve from STATICFILES_DIRS without collectstatic
 
 # Media files (local dev only; use cloud storage in production)
 MEDIA_URL = '/media/'
